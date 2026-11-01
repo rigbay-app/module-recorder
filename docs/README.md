@@ -1,13 +1,20 @@
 # Recorder module
 
-Rigbay module `recorder` (group `monitoring`, task M2): writes whatever the other modules publish on the metrics bus to a CSV file, with a
+> **Where these notes come from.** They were written in the [Rigbay repository](https://github.com/rigbay-app/rigbay) while the module lived in
+> its `modules/recorder/` folder and were copied here with only the paths changed (`docs/recorder/live/` is `docs/live/`). The agent skill and
+> `Rigbay.LangCheck` it mentions stay in the Rigbay repository. Three window screenshots were left out because they were not fit to publish:
+> `recorder-recording-dark.png` and `recorder-recording-light.png` show a folder path of the author's development checkout in the Folder row,
+> and `record-20s.png` is a black image (the capture failed). The CSV and meta files of those runs are here. In this repository the solution is
+> `Rigbay.Recorder.slnx` and it runs the 146 tests of this module.
+
+Rigbay module `recorder` (group `monitoring`): writes whatever the other modules publish on the metrics bus to a CSV file, with a
 `.meta.json` next to it that says what each column is. It replaces the CSV recording of the old standalone XTU app, and works for any module:
 the recorder knows no other module by name, so PredatorSense, XTU or a module nobody has written yet is recorded the same way.
 
-- Code: `modules/recorder/` (own `Directory.Build.props`, `Rigbay.Recorder.slnx`; the only reference outside the folder is `Rigbay.Abstractions`).
-  Tests: `modules/recorder/tests/Rigbay.Recorder.Tests` (146, no hardware, no other module). Live check: `modules/recorder/tools/live-record.ps1`.
-- Working knowledge for people changing it: `.claude/skills/recorder-module/`. What the old XTU recorder wrote and how the columns map to bus ids: `docs/xtu/RECORDER-NOTES.md`.
-- Evidence of the live run (CSV, meta, verb output, window PNGs): `docs/recorder/live/`.
+- Code: the root of this repository (`src/Rigbay.Recorder/`, own `Directory.Build.props`, `Rigbay.Recorder.slnx`; the only reference outside it is `Rigbay.Abstractions`, the submodule `external/rigbay`).
+  Tests: `tests/Rigbay.Recorder.Tests` (146, no hardware, no other module). Live check: `tools/live-record.ps1`.
+- What the old XTU recorder wrote and how the columns map to bus ids: `docs/RECORDER-NOTES.md` of [module-xtu](https://github.com/rigbay-app/module-xtu).
+- Evidence of the live run (CSV, meta, verb output, window PNGs): `docs/live/`.
 
 ## What the user sees
 
@@ -93,22 +100,22 @@ default is a read every 2 s, delivered a new value every 2 s during the recordin
 
 ## Differences from the old XTU recorder
 
-The old CSV had fixed XTU columns (`pl1_w`, `pkg_temp_c`, ...), a `status` column and a `profile` column. This one is generic. Mapping of old columns to bus ids: `docs/xtu/RECORDER-NOTES.md`. What changes for a reader of the files:
+The old CSV had fixed XTU columns (`pl1_w`, `pkg_temp_c`, ...), a `status` column and a `profile` column. This one is generic. Mapping of old columns to bus ids: `docs/RECORDER-NOTES.md` of module-xtu. What changes for a reader of the files:
 header names are bus ids; units are the bus units (the XTU module publishes clocks in MHz, the old file had GHz: divide by 1000); `status` is gone (an unavailable source is an empty cell); `profile` and `power_source` are not on the bus
 (a text channel would be needed), so they are not recorded; the CPU usage column is the bus's `cpu.usage`, which is a different measurement from the old Windows counter (see the notes).
 
 ## Verification (2026-11-01, this machine, Windows 11 10.0.26300)
 
-- `dotnet build Rigbay.sln --no-incremental`: 0 warnings, 0 errors. `dotnet test Rigbay.sln`: 791 passed (Core 353, XTU 190, PredatorSense 102, Recorder 146). The recorder tests ran 12 times in a row without a failure.
-  `dotnet run --project src/Rigbay.LangCheck -- modules/recorder/src/Rigbay.Recorder/lang --module recorder --source modules/recorder/src/Rigbay.Recorder --strict`: ok, 106 keys, en and vi complete.
+- In the Rigbay repository: `dotnet build Rigbay.sln --no-incremental`: 0 warnings, 0 errors. `dotnet test Rigbay.sln`: 791 passed (Core 353, XTU 190, PredatorSense 102, Recorder 146). The recorder tests ran 12 times in a row without a failure.
+  `Rigbay.LangCheck` of the Rigbay repository on `src/Rigbay.Recorder/lang` (`--module recorder --strict`): ok, 106 keys, en and vi complete.
 - The tests cover: schedule without drift (7 ms late wake-ups, 5 s period, a 10 s pause), column order, empty cells, a withdrawn metric, a metric present at the start only, a metric that appears later, the 30 s rule, time-limit stop,
   disk-full (start refused at 199 MB, stop under 50 MB, exactly 50 MB allowed, a failing stream), file-name collision (three in one second, a file already there), meta content, no BOM / dot decimals under vi-VN and de-DE,
   cancel safety (stop while waiting, twice, from 8 threads, 40 start/stop pairs, throwing handlers), the verbs and their bad arguments, tray, hotkey, shutdown during a recording, language switch, the manifest, the icons, the language files.
-- **Live** (`modules/recorder/tools/live-record.ps1`, the real app elevated with its own data folder, the real PredatorSense module reading its sensors, nothing written to the machine, XTU not loaded):
+- **Live** (`tools/live-record.ps1`, the real app elevated with its own data folder, the real PredatorSense module reading its sensors, nothing written to the machine, XTU not loaded):
   a recording of 20 rows through the running app's verbs (`record-20s.csv`): every gap exactly 1.000 s, `elapsed_s` 0 to 19, 6 columns from PredatorSense with their labels, no empty cell, no BOM in the CSV or the meta.
   The row at 22:37:01.442 equals what `rigbay predatorsense status` printed at 22:37:01.416 (65 / 46 / 54 °C, 2884 / 3125 / 3004 rpm). In a second run the PredatorSense page, rendered at 22:29:52.131, showed the same numbers as the row at 22:29:52.414
   (76 / 57 / 45 °C, 3896 / 4347 / 4340 rpm), and the recording that was still running when the app quit was closed properly (`stop_reason: module-stopped`).
-- PNGs of the window itself (PrintWindow of the app's own HWND, never the screen), each looked at: `recorder-recording-dark/light`, `recorder-idle-dark/light` (with the History group), `recorder-vi-dark`, `dashboard-recording-dark`, `dashboard-idle-light`, `ps-page-recording-dark`.
+- PNGs of the window itself (PrintWindow of the app's own HWND, never the screen), each looked at: `recorder-idle-dark/light` (with the History group), `recorder-vi-dark`, `dashboard-recording-dark`, `dashboard-idle-light`, `ps-page-recording-dark`.
 - The live run found two defects the tests had not: `module.json` was not valid JSON (the host listed the module as Invalid) and a backslash in a language file is dropped by the host (`\L` becomes `L`). Both now have tests.
 
 ### Not verified
