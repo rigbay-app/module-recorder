@@ -4,7 +4,7 @@ Records every metric the other Rigbay modules publish into a CSV file, with a `.
 unit, source module, description), the machine, the module versions and when the recording started and ended. Module id `recorder`.
 
 This is a module for [Rigbay](https://github.com/rigbay-app/rigbay), a Windows app that manages modules for your own machine.
-Version 0.1.0, early development: there is no release and no package.
+Version 0.1.1 (pre-release, see [CHANGELOG.md](CHANGELOG.md) and the [releases](https://github.com/rigbay-app/module-recorder/releases)), early development. **Needs Rigbay 0.1.2 or newer** (host API 0.1.3): Rigbay 0.1.0 and 0.1.1 do not check that and would offer it, so update Rigbay first.
 
 ![The module page in Rigbay while idle (dark theme)](docs/live/recorder-idle-dark.png)
 
@@ -33,7 +33,7 @@ disk checks are in [docs/README.md](docs/README.md).
 
 ## Verified and not verified
 
-**Verified** (2026-11-01, one machine, Windows 11, real Rigbay 0.1.0 host):
+**Verified** (2026-11-01 for 0.1.0, one machine, Windows 11, real Rigbay 0.1.0 host; build and tests again 2026-11-13 for 0.1.1):
 
 - `dotnet build` of the solution: 0 warnings, 0 errors, in a fresh `git clone --recurse-submodules`; `dotnet test`: 146 tests pass (a fake bus, a
   fake clock and a temporary folder; no hardware, no other module). The tests ran 12 times in a row without a failure in the Rigbay repository.
@@ -41,6 +41,7 @@ disk checks are in [docs/README.md](docs/README.md).
   stopped through the running app's verbs: 20 rows, every gap **exactly 1.000 s**, `elapsed_s` 0 to 19, six columns with their labels, no empty
   cell, no byte order mark. A row equalled what `rigbay predatorsense status` printed at the same second. The evidence is in `docs/live/`
   (`record-20s.csv`, `record-20s.meta.json`, `record-20s-verbs.txt`).
+- 0.1.1 (the new page layout, Start and Stop as one button, no change to what is written or read): build and tests in a fresh clone with the submodule, see the count above. The new page was **not** looked at in the real app for this release and no recording was made with it.
 - A second run in which the recording was still going when the app quit was closed properly (`stop_reason: module-stopped`).
 - The page and the dashboard bay were rendered and looked at in dark and light themes and in Vietnamese (`docs/live/`).
 
@@ -63,7 +64,7 @@ repository alone; it is here as the record of how the live run was made.
 
 ## Supported machines
 
-Windows with Rigbay 0.1 (`hostApi` `>=0.1 <0.2`) with the metric catalogue (`IMetricsBus.GetMetricInfo`) for labels; on a host without it the
+Windows with Rigbay 0.1.2 or newer (`hostApi` `>=0.1.3 <0.2`) with the metric catalogue (`IMetricsBus.GetMetricInfo`) for labels; on a host without it the
 columns are labelled with their ids. The module does not depend on any hardware. It was run only on one machine (an Acer Predator laptop,
 Windows 11), with PredatorSense as the only source.
 
