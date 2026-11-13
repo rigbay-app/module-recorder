@@ -4,7 +4,7 @@ Records every metric the other Rigbay modules publish into a CSV file, with a `.
 unit, source module, description), the machine, the module versions and when the recording started and ended. Module id `recorder`.
 
 This is a module for [Rigbay](https://github.com/rigbay-app/rigbay), a Windows app that manages modules for your own machine.
-Version 0.1.1 (pre-release, see [CHANGELOG.md](CHANGELOG.md) and the [releases](https://github.com/rigbay-app/module-recorder/releases)), early development. **Needs Rigbay 0.1.2 or newer** (host API 0.1.3): Rigbay 0.1.0 and 0.1.1 do not check that and would offer it, so update Rigbay first.
+Version 0.1.2 (pre-release, see [CHANGELOG.md](CHANGELOG.md) and the [releases](https://github.com/rigbay-app/module-recorder/releases)), early development. **Needs Rigbay 0.1.2 or newer** (host API 0.1.3): Rigbay 0.1.0 and 0.1.1 do not check that and would offer it, so update Rigbay first.
 
 ![The module page in Rigbay while idle (dark theme)](docs/live/recorder-idle-dark.png)
 
@@ -33,15 +33,16 @@ disk checks are in [docs/README.md](docs/README.md).
 
 ## Verified and not verified
 
-**Verified** (2026-11-01 for 0.1.0, one machine, Windows 11, real Rigbay 0.1.0 host; build and tests again 2026-11-13 for 0.1.1):
+**Verified** (2026-11-01 for 0.1.0, one machine, Windows 11, real Rigbay 0.1.0 host; build and tests again 2026-11-13 for 0.1.1 and 0.1.2):
 
-- `dotnet build` of the solution: 0 warnings, 0 errors, in a fresh `git clone --recurse-submodules`; `dotnet test`: 146 tests pass (a fake bus, a
+- `dotnet build` of the solution: 0 warnings, 0 errors, in a fresh `git clone --recurse-submodules`; `dotnet test`: 147 tests pass (a fake bus, a
   fake clock and a temporary folder; no hardware, no other module). The tests ran 12 times in a row without a failure in the Rigbay repository.
 - **A live recording of 20 s** with the real PredatorSense module as the only source (reads only; nothing was written to the machine), started and
   stopped through the running app's verbs: 20 rows, every gap **exactly 1.000 s**, `elapsed_s` 0 to 19, six columns with their labels, no empty
   cell, no byte order mark. A row equalled what `rigbay predatorsense status` printed at the same second. The evidence is in `docs/live/`
   (`record-20s.csv`, `record-20s.meta.json`, `record-20s-verbs.txt`).
 - 0.1.1 (the new page layout, Start and Stop as one button, no change to what is written or read): build and tests in a fresh clone with the submodule, see the count above. The new page was **not** looked at in the real app for this release and no recording was made with it.
+- 0.1.2 (the writing loop runs on a thread of its own; two races of the page; no change to what is written or read): build and tests in a fresh clone with the submodule. One test fails on 0.1.1 and passes on 0.1.2: it holds every thread of the thread pool and then stops a recording. A live recording with the real app was **not** repeated for 0.1.2.
 - A second run in which the recording was still going when the app quit was closed properly (`stop_reason: module-stopped`).
 - The page and the dashboard bay were rendered and looked at in dark and light themes and in Vietnamese (`docs/live/`).
 
