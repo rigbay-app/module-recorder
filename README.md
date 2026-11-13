@@ -4,7 +4,9 @@ Records every metric the other Rigbay modules publish into a CSV file, with a `.
 unit, source module, description), the machine, the module versions and when the recording started and ended. Module id `recorder`.
 
 This is a module for [Rigbay](https://github.com/rigbay-app/rigbay), a Windows app that manages modules for your own machine.
-Version 0.1.2 (pre-release, see [CHANGELOG.md](CHANGELOG.md) and the [releases](https://github.com/rigbay-app/module-recorder/releases)), early development. **Needs Rigbay 0.1.2 or newer** (host API 0.1.3): Rigbay 0.1.0 and 0.1.1 do not check that and would offer it, so update Rigbay first.
+Version 0.1.3 (pre-release, see [CHANGELOG.md](CHANGELOG.md) and the [releases](https://github.com/rigbay-app/module-recorder/releases)), early development. **Needs Rigbay 0.1.5 or newer** (host API 0.1.4): Rigbay 0.1.0 and 0.1.1 do not check that and would offer it, and 0.1.2 and 0.1.3 refuse it, so update Rigbay first.
+
+**For other modules (host API 0.1.4).** `rigbay recorder status` is declared read-only. `start` and `stop` are declared as writes of the setting kind (they write files, a CSV and a `.meta.json` in the recordings folder, not hardware and not a Windows setting). `start` is previewed from its arguments and the page's settings only, never from what the bus holds, and reports `stop` as its undo when it began a recording; `stop` has no undo. The recorder publishes no metric. Not run by a plan or another module: the tests use fakes.
 
 ![The module page in Rigbay while idle (dark theme)](docs/live/recorder-idle-dark.png)
 
@@ -33,9 +35,9 @@ disk checks are in [docs/README.md](docs/README.md).
 
 ## Verified and not verified
 
-**Verified** (2026-11-01 for 0.1.0, one machine, Windows 11, real Rigbay 0.1.0 host; build and tests again 2026-11-13 for 0.1.1 and 0.1.2):
+**Verified** (2026-11-01 for 0.1.0, one machine, Windows 11, real Rigbay 0.1.0 host; build and tests again 2026-11-13 for 0.1.1, 0.1.2 and 0.1.3):
 
-- `dotnet build` of the solution: 0 warnings, 0 errors, in a fresh `git clone --recurse-submodules`; `dotnet test`: 147 tests pass (a fake bus, a
+- `dotnet build` of the solution: 0 warnings, 0 errors, in a fresh `git clone --recurse-submodules`; `dotnet test`: 157 tests pass (a fake bus, a
   fake clock and a temporary folder; no hardware, no other module). The tests ran 12 times in a row without a failure in the Rigbay repository.
 - **A live recording of 20 s** with the real PredatorSense module as the only source (reads only; nothing was written to the machine), started and
   stopped through the running app's verbs: 20 rows, every gap **exactly 1.000 s**, `elapsed_s` 0 to 19, six columns with their labels, no empty
